@@ -4,7 +4,7 @@ const pool = mysql.createPool({
     host: '45.77.241.213',
     user: 'root',
     password: 'plc@2023*.com',
-    database: 'socket_io',
+    database: 'azor',
     waitForConnections: true,
     connectionLimit: 10000,
     queueLimit: 0
