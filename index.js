@@ -29,7 +29,6 @@ app.get('/products', async(req, res) => {
 // Endpoint to update the cart
 app.post('/update_cart', async(req, res) => {
     const order_list_code = req.body.order_list_code;
-    console.log("result: " + order_list_code);
     const data = {
         'order_list_status_order': '2'
     };
