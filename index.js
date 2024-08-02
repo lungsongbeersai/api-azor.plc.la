@@ -46,6 +46,8 @@ app.post('/update_cart', async(req, res) => {
         }
     })
 
+    res.json({ status: 'success' });
+
 
 
     // sql = `UPDATE res_orders_list SET ? 
