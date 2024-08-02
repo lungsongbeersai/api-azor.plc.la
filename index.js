@@ -28,17 +28,37 @@ app.get('/products', async(req, res) => {
 
 // Endpoint to update the cart
 app.post('/update_cart', async(req, res) => {
+    // const order_list_pro_code_fk = req.body.order_list_pro_code_fk;
     const order_list_code = req.body.order_list_code;
-    const data = {
-        'order_list_status_order': '2'
-    };
-    const sql = 'UPDATE res_orders_list SET ? WHERE order_list_code = ?';
-    try {
-        await db.query(sql, [data, order_list_code]);
-        res.json({ status: 'Update success' });
-    } catch (err) {
-        res.status(500).send(err);
-    }
+    // const data = {
+    //     'order_list_status_order': '2'
+    // };
+
+
+    let sql = `SELECT * from res_orders_list 
+    WHERE order_list_code=? 
+    AND order_list_status_order= ? 
+    AND order_list_status_cook=?`;
+    await db.query(sql, [order_list_code, '1', 'on'], function(err, rs) {
+        if (err) throw err;
+        if (rs > 0) {
+            res.json({ status: 'edit' });
+        }
+    })
+
+
+
+    // sql = `UPDATE res_orders_list SET ? 
+    // WHERE order_list_table_fk= ? 
+    // AND order_list_code = ? 
+    // AND order_list_status_order= ? 
+    // AND order_list_status_cook=? `;
+    // try {
+    //     await db.query(sql, [data, order_list_table_fk, order_list_code, '1', order_list_status_cook]);
+    //     res.json({ status: 'Update success' });
+    // } catch (err) {
+    //     res.status(500).send(err);
+    // }
 });
 
 // Handle socket connections
