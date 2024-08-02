@@ -33,12 +33,12 @@ app.post('/update_cart', async(req, res) => {
         "order_list_status_order": "2"
     };
     const sql = 'UPDATE res_orders_list SET ? WHERE order_list_code = ?';
-    try {
-        await db.promise().query(sql, [data, order_list_code]);
-        res.json({ status: 'success' });
-    } catch (err) {
-        res.status(500).send(err);
-    }
+    db.query(sql, [data, order_list_code], function(err, rs) {
+        if (err) throw err;
+        res.json({
+            status: "Update success",
+        })
+    })
 });
 
 io.on('connection', (socket) => {
