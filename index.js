@@ -39,14 +39,13 @@ app.post('/update_cart', async(req, res) => {
     WHERE order_list_code=? 
     AND order_list_status_order= ? 
     AND order_list_status_cook=?`;
-    await db.query(sql, [order_list_code, '1', 'on'], function(err, rs) {
-        if (err) throw err;
-        if (rs > 0) {
-            res.json({ status: 'edit' });
-        }
-    })
+    const results = await db.query(sql, [order_list_code, '1', 'on']);
+    if (results.length > 0) {
+        res.json({ status: 'edit', data: results });
+    } else {
+        res.json({ status: 'no data found' });
+    }
 
-    res.json({ status: 'success' });
 
 
 
