@@ -19,7 +19,7 @@ app.use(express.json());
 // Endpoint to fetch products
 app.get('/products', async(req, res) => {
     try {
-        const [results] = await db.promise().query('SELECT * FROM products');
+        const [results] = await db.query('SELECT * FROM products');
         res.json(results);
     } catch (err) {
         res.status(500).send(err);
@@ -33,22 +33,26 @@ app.post('/update_cart', async(req, res) => {
         "order_list_status_order": "2"
     };
     const sql = 'UPDATE res_orders_list SET ? WHERE order_list_code = ?';
-    db.query(sql, [data, order_list_code], function(err, rs) {
-        if (err) throw err;
-        res.json({
-            status: "Update success",
-        })
-    })
+    try {
+        await db.query(sql, [data, order_list_code]);
+        res.json({ status: 'Update success' });
+    } catch (err) {
+        res.status(500).send(err);
+    }
 });
 
+// Handle socket connections
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
+    // Example of receiving an 'order' event from the client
     socket.on('order', (data) => {
         console.log('Order received:', data);
+        // Send an 'orderConfirmation' event back to the client
         socket.emit('orderConfirmation', { message: 'Order received successfully!' });
     });
 
+    // Example of handling disconnection
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);
     });
