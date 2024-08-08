@@ -252,23 +252,25 @@ app.post('/update_cart:order_list_code', async(req, res) => {
 
 
 
-
-// Handle socket connections
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
-    // Example of receiving an 'order' event from the client
     socket.on('order', (data) => {
         console.log('Order received:', data);
-        // Send an 'orderConfirmation' event back to the client
-        socket.emit('orderConfirmation', { message: 'Order received successfully!' });
+
+        // Handle status and send the appropriate notification
+        if (data.status === '1') {
+            io.emit('orderCook', { message: 'Order received for Cook!' });
+        } else if (data.status === '2') {
+            io.emit('orderBar', { message: 'Order received for Bar!' });
+        }
     });
 
-    // Example of handling disconnection
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);
     });
 });
+
 
 // Set the port and start the server
 const PORT = process.env.PORT || 8091;
