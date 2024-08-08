@@ -148,9 +148,9 @@ io.on('connection', (socket) => {
         console.log('Order received:', data);
 
         // Handle status and send the appropriate notification
-        if (data.status === '1') {
+        if (data.status === 'off') {
             io.emit('orderCook', { message: 'Order received for Cook!' });
-        } else if (data.status === '2') {
+        } else if (data.status === 'on') {
             io.emit('orderBar', { message: 'Order received for Bar!' });
         }
     });
