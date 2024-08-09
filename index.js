@@ -147,14 +147,21 @@ io.on('connection', (socket) => {
     socket.on('order', (data) => {
         console.log('Order received:', data);
 
+        let sentOrderCook = false;
+        let sentOrderBar = false;
+
         data.status.forEach(status => {
-            if (status === 'off') {
+            if (status === 'off' && !sentOrderCook) {
                 io.emit('orderCook', { message: 'Order received for Cook!' });
-            } else if (status === 'on') {
+                sentOrderCook = true;
+            }
+            if (status === 'on' && !sentOrderBar) {
                 io.emit('orderBar', { message: 'Order received for Bar!' });
+                sentOrderBar = true;
             }
         });
     });
+
 
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);
