@@ -143,24 +143,22 @@ app.post('/update_cart', async(req, res) => {
 
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
-
     socket.on('order', (data) => {
         console.log('Order received:', data);
 
-        data.status.forEach(status => {
-            if (status === 'off') {
-                io.emit('orderCook', { message: 'Order received for Cook!' });
-            } else if (status === 'on') {
-                io.emit('orderBar', { message: 'Order received for Bar!' });
-            }
-        });
+        const status = data.status[0];
+
+        if (status === 'off') {
+            io.emit('orderCook', { message: 'Order received for Cook!' });
+        } else if (status === 'on') {
+            io.emit('orderBar', { message: 'Order received for Bar!' });
+        }
     });
 
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);
     });
 });
-
 
 
 // Set the port and start the server
