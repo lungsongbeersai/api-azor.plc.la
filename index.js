@@ -143,13 +143,14 @@ app.post('/update_cart', async(req, res) => {
 
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
-
     socket.on('order', (data) => {
         console.log('Order received:', data);
 
-        if (data.status === 'off') {
+        const status = data.status[0];
+
+        if (status === 'off') {
             io.emit('orderCook', { message: 'Order received for Cook!' });
-        } else if (data.status === 'on') {
+        } else if (status === 'on') {
             io.emit('orderBar', { message: 'Order received for Bar!' });
         }
     });
