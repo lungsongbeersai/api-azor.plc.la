@@ -107,13 +107,13 @@ app.post('/update_cart', async(req, res) => {
                     let amount = s_price * qty_stock;
                     let total = amount - (amount * order_list_percented);
 
-                    let sqlUpdateOrder = `
+                    const sqlUpdateOrder = `
                         UPDATE res_orders_list 
                         SET order_list_qty = ?, 
                             order_list_amount = ?, 
-                            order_list_total = ? ,
+                            order_list_total = ?,
                             order_list_status_order = ?
-                            WHERE order_list_code = ?
+                        WHERE order_list_code = ?
                     `;
                     await db.query(sqlUpdateOrder, [qty_stock, amount, total, '2', order_list_codes[i]]);
 
