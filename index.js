@@ -44,7 +44,7 @@ app.post('/update_cart', async(req, res) => {
             WHERE order_list_code = ?
             AND order_list_status_cook = ?
         `;
-        await db.query(query_order, ['2', order_list_code[i], 'off']);
+        await db.query(query_order, [2, order_list_code[i], 'off']);
 
         const selectSql = `
             SELECT 
