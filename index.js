@@ -16,14 +16,24 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(express.json());
 
-app.get('/products', async(req, res) => {
+app.post('/order_cart', async (req, res) => {
+    const { order_list_branch_fk, order_list_status_cook,order_list_status_order, pro_detail_cooking_status } = req.body;
+
     try {
-        const [results] = await db.query('SELECT * FROM products');
-        res.json(results);
+        const query = `SELECT * FROM view_cart 
+        WHERE order_list_branch_fk = ?
+        AND order_list_status_cook= ?
+        AND order_list_status_order = ?
+        AND pro_detail_cooking_status = ? `;
+        const [results] = await db.query(query, [order_list_branch_fk,order_list_status_cook,order_list_status_order, pro_detail_cooking_status]);
+
+        res.status(200).json(results);
     } catch (err) {
-        res.status(500).send(err);
+        // Handle errors
+        res.status(500).send(err.message);
     }
 });
+
 
 
 app.post('/update_cart', async(req, res) => {
