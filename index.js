@@ -27,16 +27,16 @@ app.get('/products', async(req, res) => {
 
 
 app.post('/update_cart', async(req, res) => {
-    const order_list_codes = req.body.order_list_codes;
+    const order_list_code = req.body.order_list_code;
 
-    if (!Array.isArray(order_list_codes)) {
-        return res.status(400).json({ status: 'fail', message: 'Invalid order_list_codes' });
+    if (!Array.isArray(order_list_code)) {
+        return res.status(400).json({ status: 'fail', message: 'Invalid order_list_code' });
     }
 
     let success = true;
     let errors = [];
 
-    for (let i = 0; i < order_list_codes.length; i++) {
+    for (let i = 0; i < order_list_code.length; i++) {
 
         const query_order = `
             UPDATE res_orders_list 
@@ -44,7 +44,7 @@ app.post('/update_cart', async(req, res) => {
             WHERE order_list_code = ?
             AND order_list_status_cook = ?
         `;
-        await db.query(query_order, ['2', order_list_codes[i], 'off']);
+        await db.query(query_order, [2, order_list_code[i], 'off']);
 
         const selectSql = `
             SELECT 
@@ -57,12 +57,13 @@ app.post('/update_cart', async(req, res) => {
             AND order_list_status_cook = ?
         `;
 
-        const [results] = await db.query(selectSql, [order_list_codes[i], '1', 'on']);
+        const [results] = await db.query(selectSql, [order_list_code[i],1, 'on']);
 
         if (results.length > 0) {
+            
             const order = results[0];
             const proidID = order.order_list_pro_code_fk;
-
+            console.log("result:",proidID)
             const sqlStock = `
                 SELECT 
                 pro_detail_qty,
@@ -82,7 +83,7 @@ app.post('/update_cart', async(req, res) => {
                 await db.query(sqlUpdateStock, [qty, item_stock.pro_detail_code]);
 
                 let sqlOrders = 'UPDATE res_orders_list SET order_list_status_order = ? WHERE order_list_code = ?';
-                await db.query(sqlOrders, ['2', order_list_codes[i]]);
+                await db.query(sqlOrders, ['2', order_list_code[i]]);
 
             } else {
 
@@ -115,7 +116,7 @@ app.post('/update_cart', async(req, res) => {
                             order_list_status_order = ?
                         WHERE order_list_code = ?
                     `;
-                    await db.query(sqlUpdateOrder, [qty_stock, amount, total, '2', order_list_codes[i]]);
+                    await db.query(sqlUpdateOrder, [qty_stock, amount, total, '2', order_list_code[i]]);
 
                     let update_qty = `
                         UPDATE view_product_detail 
@@ -125,13 +126,15 @@ app.post('/update_cart', async(req, res) => {
                     await db.query(update_qty, ['0', proidID]);
                 } else {
                     success = false;
-                    errors.push({ order_code: order_list_codes[i], message: 'Out of stock' });
+                    errors.push({ order_code: order_list_code[i], message: 'Out of stock' });
                 }
             }
-        } else {
-            success = false;
-            errors.push({ order_code: order_list_codes[i], message: 'Order not found' });
         }
+        
+        // else {
+        //     success = false;
+        //     errors.push({ order_code: order_list_code[i], message: 'Order not found' });
+        // }
     }
 
     if (success) {
@@ -140,6 +143,7 @@ app.post('/update_cart', async(req, res) => {
         res.status(400).json({ status: 'fail', errors });
     }
 });
+
 
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
