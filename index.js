@@ -151,20 +151,12 @@ io.on('connection', (socket) => {
         let sentOrderBar = false;
 
         data.status.forEach(status => {
-            if (status === '20240000001' && !sentOrderCook) {
-                io.emit('orderCook1', { message: 'Order received for Cook1!' });
+            if (status === 'off' && !sentOrderCook) {
+                io.emit('orderCook', { message: 'Order received for Cook!' });
                 sentOrderCook = true;
             }
-            if (status === '20240000002' && !sentOrderCook) {
-                io.emit('orderCook2', { message: 'Order received for Cook2!' });
-                sentOrderCook = true;
-            }
-            if (status === '20240000003' && !sentOrderBar) {
-                io.emit('orderBar', { message: 'Order received for Bar1!' });
-                sentOrderBar = true;
-            }
-            if (status === '20240000004' && !sentOrderBar) {
-                io.emit('orderBar', { message: 'Order received for Bar2!' });
+            if (status === 'on' && !sentOrderBar) {
+                io.emit('orderBar', { message: 'Order received for Bar!' });
                 sentOrderBar = true;
             }
         });
