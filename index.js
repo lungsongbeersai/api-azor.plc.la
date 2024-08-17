@@ -166,11 +166,11 @@ let whereCooking = []; // Initialize whereCooking globally
 
 // Handle socket connections
 io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
+    // console.log('A user connected:', socket.id);
 
     // Handle incoming 'order' events
     socket.on('order', (data) => {
-        console.log('Received Params:', data);
+        // console.log('Received Params:', data);
 
         // Directly update whereCooking from the incoming data
         if (Array.isArray(data.whereCooking)) {
@@ -194,7 +194,7 @@ io.on('connection', (socket) => {
             }
         });
 
-        console.log('Updated whereCooking:', whereCooking); // Print current whereCooking for debugging
+        // console.log('Updated whereCooking:', whereCooking); // Print current whereCooking for debugging
     });
 
     // Handle socket disconnection
