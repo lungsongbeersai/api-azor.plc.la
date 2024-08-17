@@ -17,22 +17,29 @@ app.use(cors());
 app.use(express.json());
 
 app.post('/order_cart', async (req, res) => {
-    const { order_list_branch_fk, order_list_status_cook,order_list_status_order, pro_detail_cooking_status } = req.body;
+    const { order_list_branch_fk, order_list_status_cook, order_list_status_order, pro_detail_cooking_status } = req.body;
+
+    // console.log('Received Params:', req.body);
 
     try {
         const query = `SELECT * FROM view_cart 
         WHERE order_list_branch_fk = ?
-        AND order_list_status_cook= ?
+        AND order_list_status_cook = ?
         AND order_list_status_order = ?
-        AND pro_detail_cooking_status = ? `;
-        const [results] = await db.query(query, [order_list_branch_fk,order_list_status_cook,order_list_status_order, pro_detail_cooking_status]);
+        AND pro_detail_cooking_status = ? 
+        Order by order_list_q ASC`;
+        
+        const [results] = await db.query(query, [order_list_branch_fk, order_list_status_cook, order_list_status_order, pro_detail_cooking_status]);
+        
+        // console.log('Query Results:', results);
 
         res.status(200).json(results);
     } catch (err) {
-        // Handle errors
+        console.error('Error:', err.message);
         res.status(500).send(err.message);
     }
 });
+
 
 
 
@@ -155,31 +162,51 @@ app.post('/update_cart', async(req, res) => {
 });
 
 
+let whereCooking = []; // Initialize whereCooking globally
+
+// Handle socket connections
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
+
+    // Handle incoming 'order' events
     socket.on('order', (data) => {
-        console.log('Order received:', data);
+        console.log('Received Params:', data);
+
+        // Directly update whereCooking from the incoming data
+        if (Array.isArray(data.whereCooking)) {
+            whereCooking = data.whereCooking;
+        } else {
+            console.error('Invalid data format for whereCooking:', data.whereCooking);
+        }
 
         let sentOrderCook = false;
         let sentOrderBar = false;
 
-        data.status.forEach(status => {
+        // Iterate over status values and emit events accordingly
+        data.status.forEach((status) => {
             if (status === 'off' && !sentOrderCook) {
-                io.emit('orderCook', { message: 'Order received for Cook!' });
+                io.emit('orderCook', { message: whereCooking.join(', ') });
                 sentOrderCook = true;
             }
             if (status === 'on' && !sentOrderBar) {
-                io.emit('orderBar', { message: 'Order received for Bar!' });
+                io.emit('orderBar', { message: whereCooking.join(', ') });
                 sentOrderBar = true;
             }
         });
+
+        console.log('Updated whereCooking:', whereCooking); // Print current whereCooking for debugging
     });
 
-
+    // Handle socket disconnection
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);
     });
 });
+
+
+
+
+
 
 
 // Set the port and start the server
