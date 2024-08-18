@@ -16,6 +16,26 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(express.json());
 
+app.post('/order_status', async (req, res) => {
+    const { order_list_status_order, order_list_code } = req.body;
+    try {
+        const query = `UPDATE res_orders_list SET order_list_status_order = ? 
+        WHERE order_list_code = ?`;
+        
+        const [results] = await db.query(query, [order_list_status_order, order_list_code]);
+        
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: "error" });
+        }
+
+        res.status(200).json({ status: "success"});
+    } catch (err) {
+        console.error('Error:', err.message);
+        res.status(500).send(err.message);
+    }
+});
+
+
 app.post('/order_cart', async (req, res) => {
     const { order_list_branch_fk, order_list_status_cook, order_list_status_order, pro_detail_cooking_status } = req.body;
 
@@ -39,9 +59,6 @@ app.post('/order_cart', async (req, res) => {
         res.status(500).send(err.message);
     }
 });
-
-
-
 
 app.post('/update_cart', async(req, res) => {
     const order_list_code = req.body.order_list_code;
@@ -181,6 +198,7 @@ io.on('connection', (socket) => {
 
         let sentOrderCook = false;
         let sentOrderBar = false;
+        let sentConfirm=false;
 
         // Iterate over status values and emit events accordingly
         data.status.forEach((status) => {
@@ -195,6 +213,12 @@ io.on('connection', (socket) => {
         });
 
         // console.log('Updated whereCooking:', whereCooking); // Print current whereCooking for debugging
+    });
+
+    socket.on('cookConfirm', (data) => {
+        console.log('Received Params:', data);
+        io.emit('EmitCookConfirm', { message: "ຮັບອໍເດີ"});
+        sentConfirm=true;
     });
 
     // Handle socket disconnection
