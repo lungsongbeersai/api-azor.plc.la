@@ -198,7 +198,7 @@ io.on('connection', (socket) => {
 
         let sentOrderCook = false;
         let sentOrderBar = false;
-        let sentConfirm=false;
+        
 
         // Iterate over status values and emit events accordingly
         data.status.forEach((status) => {
@@ -215,21 +215,27 @@ io.on('connection', (socket) => {
         // console.log('Updated whereCooking:', whereCooking); // Print current whereCooking for debugging
     });
 
+
     socket.on('cookConfirm', (data) => {
-        console.log('Received Params:', data);
-        io.emit('EmitCookConfirm', { message: "ຮັບອໍເດີ"});
-        sentConfirm=true;
+        console.log('Confirm orders:', data);
+    
+        // Check if branchCode is a string
+        if (typeof data.branchCode === 'string') {
+            // Emit the confirmation message for the single branch code
+            io.emit('EmitCookConfirm', { message: "ຮັບອໍເດີ" });
+            console.log('Show commit:', data.branchCode);
+        } else {
+            console.error('branchCode is not a string or is undefined:', data.branchCode);
+        }
     });
+    
+    
 
     // Handle socket disconnection
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);
     });
 });
-
-
-
-
 
 
 
