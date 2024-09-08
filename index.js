@@ -36,6 +36,28 @@ app.post('/order_status', async (req, res) => {
 });
 
 
+app.post('/notification', async (req, res) => {
+    const { order_list_branch_fk, order_list_status_order } = req.body;
+
+    // console.log('Received Params:', req.body);
+
+    try {
+        const query = `SELECT * FROM view_cart 
+        WHERE order_list_branch_fk = ?
+        AND order_list_status_order = ?
+        Order by order_list_q ASC`;
+        
+        const [results] = await db.query(query, [order_list_branch_fk, order_list_status_order]);
+        
+        // console.log('Query Results:', results);
+
+        res.status(200).json(results);
+    } catch (err) {
+        console.error('Error:', err.message);
+        res.status(500).send(err.message);
+    }
+});
+
 app.post('/order_cart', async (req, res) => {
     const { order_list_branch_fk, order_list_status_cook, order_list_status_order, pro_detail_cooking_status } = req.body;
 
@@ -79,6 +101,14 @@ app.post('/update_cart', async(req, res) => {
             AND order_list_status_cook = ?
         `;
         await db.query(query_order, [2, order_list_code[i], 'off']);
+
+        const query_toping = `
+        UPDATE res_orders_list_toping 
+        SET order_toping_status = ? 
+        WHERE order_toping_order_fk = ?
+        `;
+        await db.query(query_toping, [2, order_list_code[i]]);
+
 
         const selectSql = `
             SELECT 
@@ -179,17 +209,10 @@ app.post('/update_cart', async(req, res) => {
 });
 
 
-let whereCooking = []; // Initialize whereCooking globally
-
-// Handle socket connections
+let whereCooking = [];
 io.on('connection', (socket) => {
-    // console.log('A user connected:', socket.id);
 
-    // Handle incoming 'order' events
     socket.on('order', (data) => {
-        // console.log('Received Params:', data);
-
-        // Directly update whereCooking from the incoming data
         if (Array.isArray(data.whereCooking)) {
             whereCooking = data.whereCooking;
         } else {
@@ -216,20 +239,20 @@ io.on('connection', (socket) => {
     });
 
 
-    socket.on('cookConfirm', (data) => {
+    socket.on('call_orders', (data) => {
         console.log('Confirm orders:', data);
     
         // Check if branchCode is a string
         if (typeof data.branchCode === 'string') {
             // Emit the confirmation message for the single branch code
-            io.emit('EmitCookConfirm', { message: "ຮັບອໍເດີ" });
+            io.emit('emit_callOrder', { message: "ຮັບອໍເດີ" });
             console.log('Show commit:', data.branchCode);
         } else {
             console.error('branchCode is not a string or is undefined:', data.branchCode);
         }
     });
     
-    
+    console.log("connection...")
 
     // Handle socket disconnection
     socket.on('disconnect', () => {
